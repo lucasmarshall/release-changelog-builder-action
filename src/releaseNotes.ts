@@ -1,8 +1,8 @@
 import * as core from '@actions/core'
+import {Octokit} from '@octokit/rest'
 import {CommitInfo, Commits, filterCommits} from './commits'
 import {Configuration, DefaultConfiguration} from './configuration'
 import {PullRequestInfo, PullRequests} from './pullRequests'
-import {Octokit} from '@octokit/rest'
 import {buildChangelog} from './transform'
 import {failOrError} from './utils'
 
@@ -14,6 +14,7 @@ export interface ReleaseNotesOptions {
   failOnError: boolean // defines if we should fail the action in case of an error
   commitMode: boolean // defines if we use the alternative commit based mode. note: this is only partially supported
   configuration: Configuration // the configuration as defined in `configuration.ts`
+  filePath?: string // the basepath of the files to collect PRs including
 }
 
 export class ReleaseNotes {
@@ -121,7 +122,8 @@ export class ReleaseNotes {
     const prCommits = filterCommits(
       commits,
       configuration.exclude_merge_branches ||
-        DefaultConfiguration.exclude_merge_branches
+        DefaultConfiguration.exclude_merge_branches,
+      this.options.filePath
     )
 
     core.info(
@@ -166,7 +168,8 @@ export class ReleaseNotes {
     const prCommits = filterCommits(
       commits,
       configuration.exclude_merge_branches ||
-        DefaultConfiguration.exclude_merge_branches
+        DefaultConfiguration.exclude_merge_branches,
+      this.options.filePath
     )
 
     core.info(`ℹ️ Retrieved ${prCommits.length} commits for ${owner}/${repo}`)

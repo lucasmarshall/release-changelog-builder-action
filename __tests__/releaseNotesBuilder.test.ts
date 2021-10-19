@@ -1,5 +1,5 @@
-import {resolveConfiguration} from '../src/utils'
 import {ReleaseNotesBuilder} from '../src/releaseNotesBuilder'
+import {resolveConfiguration} from '../src/utils'
 
 jest.setTimeout(180000)
 
@@ -15,7 +15,8 @@ it('Should match generated changelog (unspecified fromTag)', async () => {
     false,
     false,
     false,
-    configuration
+    configuration,
+    undefined
   )
 
   const changeLog = await releaseNotesBuilder.build()
@@ -40,7 +41,8 @@ it('Should match generated changelog (unspecified tags)', async () => {
     false,
     false,
     false,
-    configuration
+    configuration,
+    undefined
   )
 
   const changeLog = await releaseNotesBuilder.build()
@@ -62,7 +64,8 @@ it('Should use empty placeholder', async () => {
     false,
     false,
     false,
-    configuration
+    configuration,
+    undefined
   )
 
   const changeLog = await releaseNotesBuilder.build()
@@ -85,7 +88,8 @@ it('Should fill empty placeholders', async () => {
     false,
     false,
     false,
-    configuration
+    configuration,
+    undefined
   )
 
   const changeLog = await releaseNotesBuilder.build()
@@ -110,7 +114,8 @@ it('Should fill `template` placeholders', async () => {
     false,
     false,
     false,
-    configuration
+    configuration,
+    undefined
   )
 
   const changeLog = await releaseNotesBuilder.build()
@@ -135,7 +140,8 @@ it('Should fill `template` placeholders, ignore', async () => {
     false,
     false,
     false,
-    configuration
+    configuration,
+    undefined
   )
 
   const changeLog = await releaseNotesBuilder.build()
@@ -160,7 +166,8 @@ it('Uncategorized category', async () => {
     false,
     false,
     false,
-    configuration
+    configuration,
+    undefined
   )
 
   const changeLog = await releaseNotesBuilder.build()
@@ -185,7 +192,8 @@ it('Verify commit based changelog', async () => {
     false,
     false,
     true,
-    configuration
+    configuration,
+    undefined
   )
 
   const changeLog = await releaseNotesBuilder.build()
@@ -210,7 +218,8 @@ it('Verify commit based changelog, with emoji categorisation', async () => {
     false,
     false,
     true,
-    configuration
+    configuration,
+    undefined
   )
 
   const changeLog = await releaseNotesBuilder.build()

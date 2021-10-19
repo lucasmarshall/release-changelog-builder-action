@@ -1,7 +1,7 @@
-import {buildChangelog} from '../src/transform'
-import {PullRequestInfo} from '../src/pullRequests'
 import moment from 'moment'
-import { DefaultConfiguration, Configuration } from '../src/configuration';
+import {DefaultConfiguration} from '../src/configuration'
+import {PullRequestInfo} from '../src/pullRequests'
+import {buildChangelog} from '../src/transform'
 
 jest.setTimeout(180000)
 
@@ -102,7 +102,8 @@ it('Extract label from title, combined regex', async () => {
     toTag: '2.0.0',
     failOnError: false,
     commitMode: false,
-    configuration
+    configuration,
+    filePath: undefined
   })
 
   expect(resultChangelog).toStrictEqual(
@@ -131,7 +132,8 @@ it('Extract label from title, split regex', async () => {
     toTag: '2.0.0',
     failOnError: false,
     commitMode: false,
-    configuration
+    configuration,
+    filePath: undefined
   })
 
   expect(resultChangelog).toStrictEqual(
@@ -160,7 +162,8 @@ it('Extract label from title, match', async () => {
     toTag: '2.0.0',
     failOnError: false,
     commitMode: false,
-    configuration
+    configuration,
+    filePath: undefined
   })
 
   expect(resultChangelog).toStrictEqual(
@@ -184,7 +187,8 @@ it('Extract label from title, match multiple', async () => {
     toTag: '2.0.0',
     failOnError: false,
     commitMode: false,
-    configuration
+    configuration,
+    filePath: undefined
   })
 
   expect(resultChangelog).toStrictEqual(
@@ -284,7 +288,8 @@ it('Match multiple labels exhaustive for category', async () => {
     toTag: '2.0.0',
     failOnError: false,
     commitMode: false,
-    configuration: customConfig
+    configuration: customConfig,
+    filePath: undefined
   })
 
   expect(resultChangelog).toStrictEqual(
@@ -307,7 +312,8 @@ it('Deduplicate duplicated PRs', async () => {
     toTag: '2.0.0',
     failOnError: false,
     commitMode: false,
-    configuration: customConfig
+    configuration: customConfig,
+    filePath: undefined
   })
 
   expect(resultChangelog).toStrictEqual(
@@ -317,7 +323,7 @@ it('Deduplicate duplicated PRs', async () => {
 
 it('Deduplicate duplicated PRs DESC', async () => {
   const customConfig = Object.assign({}, DefaultConfiguration)
-  customConfig.sort = "DESC"
+  customConfig.sort = 'DESC'
   customConfig.duplicate_filter = {
     pattern: '\\[ABC-....\\]',
     on_property: 'title',
@@ -331,7 +337,8 @@ it('Deduplicate duplicated PRs DESC', async () => {
     toTag: '2.0.0',
     failOnError: false,
     commitMode: false,
-    configuration: customConfig
+    configuration: customConfig,
+    filePath: undefined
   })
 
   expect(resultChangelog).toStrictEqual(

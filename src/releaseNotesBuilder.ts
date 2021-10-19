@@ -1,10 +1,10 @@
 import * as core from '@actions/core'
-import {Configuration, DefaultConfiguration} from './configuration'
 import {Octokit} from '@octokit/rest'
+import {Configuration, DefaultConfiguration} from './configuration'
 import {ReleaseNotes} from './releaseNotes'
 import {Tags} from './tags'
-import {failOrError} from './utils'
 import {fillAdditionalPlaceholders} from './transform'
+import {failOrError} from './utils'
 
 export class ReleaseNotesBuilder {
   constructor(
@@ -17,7 +17,8 @@ export class ReleaseNotesBuilder {
     private failOnError: boolean,
     private ignorePreReleases: boolean,
     private commitMode: boolean,
-    private configuration: Configuration
+    private configuration: Configuration,
+    private filePath?: string
   ) {}
 
   async build(): Promise<string | null> {
@@ -87,7 +88,8 @@ export class ReleaseNotesBuilder {
       toTag: this.toTag,
       failOnError: this.failOnError,
       commitMode: this.commitMode,
-      configuration: this.configuration
+      configuration: this.configuration,
+      filePath: this.filePath
     }
     const releaseNotes = new ReleaseNotes(octokit, options)
 

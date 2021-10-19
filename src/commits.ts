@@ -8,6 +8,7 @@ export interface CommitInfo {
   message: string
   author: string
   date: moment.Moment
+  files: string[]
 }
 
 export class Commits {
@@ -66,7 +67,11 @@ export class Commits {
         message: commit.commit.message,
         date: moment(commit.commit.committer?.date),
         author: commit.commit.author?.name || '',
-        prNumber: undefined
+        prNumber: undefined,
+        files:
+          (commit.files
+            ?.map(file => file.filename)
+            .filter(filename => filename) as string[] | undefined) || []
       }))
   }
 
@@ -100,7 +105,8 @@ export class Commits {
  */
 export function filterCommits(
   commits: CommitInfo[],
-  excludeMergeBranches: string[]
+  excludeMergeBranches: string[],
+  filePath?: string
 ): CommitInfo[] {
   const filteredCommits = []
 
@@ -118,6 +124,12 @@ export function filterCommits(
       }
     }
     filteredCommits.push(commit)
+  }
+
+  if (filePath) {
+    return filteredCommits.filter(commit =>
+      commit.files.some(filename => filename.startsWith(filePath))
+    )
   }
 
   return filteredCommits

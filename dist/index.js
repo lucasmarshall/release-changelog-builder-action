@@ -75,14 +75,15 @@ class Commits {
             return commits
                 .filter(commit => commit.sha)
                 .map(commit => {
-                var _a, _b;
+                var _a, _b, _c;
                 return ({
                     sha: commit.sha || '',
                     summary: commit.commit.message.split('\n')[0],
                     message: commit.commit.message,
                     date: (0, moment_1.default)((_a = commit.commit.committer) === null || _a === void 0 ? void 0 : _a.date),
                     author: ((_b = commit.commit.author) === null || _b === void 0 ? void 0 : _b.name) || '',
-                    prNumber: undefined
+                    prNumber: undefined,
+                    files: ((_c = commit.files) === null || _c === void 0 ? void 0 : _c.map(file => file.filename).filter(filename => filename)) || []
                 });
             });
         });
@@ -113,7 +114,7 @@ exports.Commits = Commits;
 /**
  * Filters out all commits which match the exclude pattern
  */
-function filterCommits(commits, excludeMergeBranches) {
+function filterCommits(commits, excludeMergeBranches, filePath) {
     const filteredCommits = [];
     for (const commit of commits) {
         if (excludeMergeBranches) {
@@ -129,6 +130,9 @@ function filterCommits(commits, excludeMergeBranches) {
             }
         }
         filteredCommits.push(commit);
+    }
+    if (filePath) {
+        return filteredCommits.filter(commit => commit.files.some(filename => filename.startsWith(filePath)));
     }
     return filteredCommits;
 }
@@ -341,8 +345,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
-const utils_1 = __nccwpck_require__(918);
 const releaseNotesBuilder_1 = __nccwpck_require__(4883);
+const utils_1 = __nccwpck_require__(918);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         core.setOutput('failed', false); // mark the action not failed by default
@@ -365,7 +369,8 @@ function run() {
             const ignorePreReleases = core.getInput('ignorePreReleases') === 'true';
             const failOnError = core.getInput('failOnError') === 'true';
             const commitMode = core.getInput('commitMode') === 'true';
-            const result = yield new releaseNotesBuilder_1.ReleaseNotesBuilder(token, repositoryPath, owner, repo, fromTag, toTag, failOnError, ignorePreReleases, commitMode, configuration).build();
+            const filePath = core.getInput('filePath');
+            const result = yield new releaseNotesBuilder_1.ReleaseNotesBuilder(token, repositoryPath, owner, repo, fromTag, toTag, failOnError, ignorePreReleases, commitMode, configuration, filePath).build();
             core.setOutput('changelog', result);
             // write the result in changelog to file if possible
             const outputFile = core.getInput('outputFile');
@@ -661,7 +666,7 @@ class ReleaseNotes {
             const pullRequests = yield pullRequestsApi.getBetweenDates(owner, repo, fromDate, toDate, configuration.max_pull_requests || configuration_1.DefaultConfiguration.max_pull_requests);
             core.info(`ℹ️ Retrieved ${pullRequests.length} merged PRs for ${owner}/${repo}`);
             const prCommits = (0, commits_1.filterCommits)(commits, configuration.exclude_merge_branches ||
-                configuration_1.DefaultConfiguration.exclude_merge_branches);
+                configuration_1.DefaultConfiguration.exclude_merge_branches, this.options.filePath);
             core.info(`ℹ️ Retrieved ${prCommits.length} release commits for ${owner}/${repo}`);
             // create array of commits for this release
             const releaseCommitHashes = prCommits.map(commmit => {
@@ -693,7 +698,7 @@ class ReleaseNotes {
                 return [];
             }
             const prCommits = (0, commits_1.filterCommits)(commits, configuration.exclude_merge_branches ||
-                configuration_1.DefaultConfiguration.exclude_merge_branches);
+                configuration_1.DefaultConfiguration.exclude_merge_branches, this.options.filePath);
             core.info(`ℹ️ Retrieved ${prCommits.length} commits for ${owner}/${repo}`);
             return prCommits.map(function (commit) {
                 return {
@@ -756,14 +761,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ReleaseNotesBuilder = void 0;
 const core = __importStar(__nccwpck_require__(2186));
-const configuration_1 = __nccwpck_require__(5527);
 const rest_1 = __nccwpck_require__(5375);
+const configuration_1 = __nccwpck_require__(5527);
 const releaseNotes_1 = __nccwpck_require__(5882);
 const tags_1 = __nccwpck_require__(7532);
-const utils_1 = __nccwpck_require__(918);
 const transform_1 = __nccwpck_require__(1644);
+const utils_1 = __nccwpck_require__(918);
 class ReleaseNotesBuilder {
-    constructor(token, repositoryPath, owner, repo, fromTag, toTag, failOnError, ignorePreReleases, commitMode, configuration) {
+    constructor(token, repositoryPath, owner, repo, fromTag, toTag, failOnError, ignorePreReleases, commitMode, configuration, filePath) {
         this.token = token;
         this.repositoryPath = repositoryPath;
         this.owner = owner;
@@ -774,6 +779,7 @@ class ReleaseNotesBuilder {
         this.ignorePreReleases = ignorePreReleases;
         this.commitMode = commitMode;
         this.configuration = configuration;
+        this.filePath = filePath;
     }
     build() {
         var _a, _b;
@@ -829,7 +835,8 @@ class ReleaseNotesBuilder {
                 toTag: this.toTag,
                 failOnError: this.failOnError,
                 commitMode: this.commitMode,
-                configuration: this.configuration
+                configuration: this.configuration,
+                filePath: this.filePath
             };
             const releaseNotes = new releaseNotes_1.ReleaseNotes(octokit, options);
             return ((yield releaseNotes.pull()) ||

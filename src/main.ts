@@ -1,11 +1,11 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
+import {ReleaseNotesBuilder} from './releaseNotesBuilder'
 import {
   resolveConfiguration,
   retrieveRepositoryPath,
   writeOutput
 } from './utils'
-import {ReleaseNotesBuilder} from './releaseNotesBuilder'
 
 async function run(): Promise<void> {
   core.setOutput('failed', false) // mark the action not failed by default
@@ -34,6 +34,7 @@ async function run(): Promise<void> {
     const ignorePreReleases = core.getInput('ignorePreReleases') === 'true'
     const failOnError = core.getInput('failOnError') === 'true'
     const commitMode = core.getInput('commitMode') === 'true'
+    const filePath = core.getInput('filePath')
 
     const result = await new ReleaseNotesBuilder(
       token,
@@ -45,7 +46,8 @@ async function run(): Promise<void> {
       failOnError,
       ignorePreReleases,
       commitMode,
-      configuration
+      configuration,
+      filePath
     ).build()
 
     core.setOutput('changelog', result)
