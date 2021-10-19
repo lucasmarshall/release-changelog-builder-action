@@ -124,10 +124,10 @@ export function filterCommits(
   }
 
   if (filePath) {
-    return filteredCommits.filter(commit =>
-      commit.files
-        ? commit.files.some(file => file.filename?.startsWith(filePath))
-        : true
+    return filteredCommits.filter(
+      commit =>
+        commit.files &&
+        commit.files.some(file => file.filename?.startsWith(filePath))
     )
   }
 

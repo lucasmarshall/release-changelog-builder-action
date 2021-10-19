@@ -132,9 +132,8 @@ function filterCommits(commits, excludeMergeBranches, filePath) {
         filteredCommits.push(commit);
     }
     if (filePath) {
-        return filteredCommits.filter(commit => commit.files
-            ? commit.files.some(file => { var _a; return (_a = file.filename) === null || _a === void 0 ? void 0 : _a.startsWith(filePath); })
-            : true);
+        return filteredCommits.filter(commit => commit.files &&
+            commit.files.some(file => { var _a; return (_a = file.filename) === null || _a === void 0 ? void 0 : _a.startsWith(filePath); }));
     }
     return filteredCommits;
 }
@@ -1297,12 +1296,12 @@ function fillTemplate(pr, template) {
     transformed = transformed.replace(/\${{TITLE}}/g, pr.title);
     transformed = transformed.replace(/\${{URL}}/g, pr.htmlURL);
     transformed = transformed.replace(/\${{MERGED_AT}}/g, pr.mergedAt.toISOString());
-    transformed = transformed.replace(/\${{AUTHOR}}/g, pr.author);
+    transformed = transformed.replace(/\${{AUTHOR}}/g, `@${pr.author}`);
     transformed = transformed.replace(/\${{LABELS}}/g, ((_a = [...pr.labels]) === null || _a === void 0 ? void 0 : _a.join(', ')) || '');
     transformed = transformed.replace(/\${{MILESTONE}}/g, pr.milestone || '');
     transformed = transformed.replace(/\${{BODY}}/g, pr.body);
-    transformed = transformed.replace(/\${{ASSIGNEES}}/g, ((_b = pr.assignees) === null || _b === void 0 ? void 0 : _b.join(', ')) || '');
-    transformed = transformed.replace(/\${{REVIEWERS}}/g, ((_c = pr.requestedReviewers) === null || _c === void 0 ? void 0 : _c.join(', ')) || '');
+    transformed = transformed.replace(/\${{ASSIGNEES}}/g, ((_b = pr.assignees) === null || _b === void 0 ? void 0 : _b.map(assignee => `@${assignee}`).join(', ')) || '');
+    transformed = transformed.replace(/\${{REVIEWERS}}/g, ((_c = pr.requestedReviewers) === null || _c === void 0 ? void 0 : _c.map(reviewer => `@${reviewer}`).join(', ')) || '');
     return transformed;
 }
 function transform(filled, transformers) {
