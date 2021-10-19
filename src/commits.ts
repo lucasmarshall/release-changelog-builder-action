@@ -124,6 +124,9 @@ export function filterCommits(
   }
 
   if (filePath) {
+    // eslint-disable-next-line no-console
+    console.log(filteredCommits)
+
     return filteredCommits.filter(
       commit =>
         commit.files &&
