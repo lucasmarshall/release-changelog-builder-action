@@ -8,7 +8,7 @@ export interface CommitInfo {
   message: string
   author: string
   date: moment.Moment
-  files: string[]
+  files: RestEndpointMethodTypes['repos']['compareCommits']['response']['data']['commits'][0]['files']
 }
 
 export class Commits {
@@ -68,10 +68,7 @@ export class Commits {
         date: moment(commit.commit.committer?.date),
         author: commit.commit.author?.name || '',
         prNumber: undefined,
-        files:
-          (commit.files
-            ?.map(file => file.filename)
-            .filter(filename => filename) as string[] | undefined) || []
+        files: commit.files
       }))
   }
 
@@ -128,7 +125,9 @@ export function filterCommits(
 
   if (filePath) {
     return filteredCommits.filter(commit =>
-      commit.files.some(filename => filename.startsWith(filePath))
+      commit.files
+        ? commit.files.some(file => file.filename?.startsWith(filePath))
+        : true
     )
   }
 

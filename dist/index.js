@@ -75,7 +75,7 @@ class Commits {
             return commits
                 .filter(commit => commit.sha)
                 .map(commit => {
-                var _a, _b, _c;
+                var _a, _b;
                 return ({
                     sha: commit.sha || '',
                     summary: commit.commit.message.split('\n')[0],
@@ -83,7 +83,7 @@ class Commits {
                     date: (0, moment_1.default)((_a = commit.commit.committer) === null || _a === void 0 ? void 0 : _a.date),
                     author: ((_b = commit.commit.author) === null || _b === void 0 ? void 0 : _b.name) || '',
                     prNumber: undefined,
-                    files: ((_c = commit.files) === null || _c === void 0 ? void 0 : _c.map(file => file.filename).filter(filename => filename)) || []
+                    files: commit.files
                 });
             });
         });
@@ -132,7 +132,9 @@ function filterCommits(commits, excludeMergeBranches, filePath) {
         filteredCommits.push(commit);
     }
     if (filePath) {
-        return filteredCommits.filter(commit => commit.files.some(filename => filename.startsWith(filePath)));
+        return filteredCommits.filter(commit => commit.files
+            ? commit.files.some(file => { var _a; return (_a = file.filename) === null || _a === void 0 ? void 0 : _a.startsWith(filePath); })
+            : true);
     }
     return filteredCommits;
 }
