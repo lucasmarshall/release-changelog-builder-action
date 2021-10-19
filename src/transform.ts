@@ -246,7 +246,7 @@ function fillTemplate(pr: PullRequestInfo, template: string): string {
     /\${{MERGED_AT}}/g,
     pr.mergedAt.toISOString()
   )
-  transformed = transformed.replace(/\${{AUTHOR}}/g, pr.author)
+  transformed = transformed.replace(/\${{AUTHOR}}/g, `@${pr.author}`)
   transformed = transformed.replace(
     /\${{LABELS}}/g,
     [...pr.labels]?.join(', ') || ''
@@ -255,11 +255,11 @@ function fillTemplate(pr: PullRequestInfo, template: string): string {
   transformed = transformed.replace(/\${{BODY}}/g, pr.body)
   transformed = transformed.replace(
     /\${{ASSIGNEES}}/g,
-    pr.assignees?.join(', ') || ''
+    pr.assignees?.map(assignee => `@${assignee}`).join(', ') || ''
   )
   transformed = transformed.replace(
     /\${{REVIEWERS}}/g,
-    pr.requestedReviewers?.join(', ') || ''
+    pr.requestedReviewers?.map(reviewer => `@${reviewer}`).join(', ') || ''
   )
   return transformed
 }
