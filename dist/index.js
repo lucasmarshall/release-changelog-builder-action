@@ -59,17 +59,18 @@ class Commits {
             let compareHead = head;
             // eslint-disable-next-line no-constant-condition
             while (true) {
-                const compareResult = yield this.octokit.repos.compareCommits({
+                const compareResult = yield this.octokit.repos.compareCommitsWithBasehead({
                     owner,
                     repo,
-                    base,
-                    head: compareHead
+                    basehead: `${base}...${compareHead}`
                 });
                 if (compareResult.data.total_commits === 0) {
                     break;
                 }
                 commits = compareResult.data.commits.concat(commits);
                 compareHead = `${commits[0].sha}^`;
+                // eslint-disable-next-line no-console
+                console.log(JSON.stringify(compareResult, null, 2));
             }
             core.info(`ℹ️ Found ${commits.length} commits from the GitHub API for ${owner}/${repo}`);
             return commits
@@ -132,8 +133,6 @@ function filterCommits(commits, excludeMergeBranches, filePath) {
         filteredCommits.push(commit);
     }
     if (filePath) {
-        // eslint-disable-next-line no-console
-        console.log(filteredCommits);
         return filteredCommits.filter(commit => commit.files &&
             commit.files.some(file => { var _a; return (_a = file.filename) === null || _a === void 0 ? void 0 : _a.startsWith(filePath); }));
     }

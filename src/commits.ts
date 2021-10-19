@@ -42,17 +42,20 @@ export class Commits {
     let compareHead = head
     // eslint-disable-next-line no-constant-condition
     while (true) {
-      const compareResult = await this.octokit.repos.compareCommits({
-        owner,
-        repo,
-        base,
-        head: compareHead
-      })
+      const compareResult = await this.octokit.repos.compareCommitsWithBasehead(
+        {
+          owner,
+          repo,
+          basehead: `${base}...${compareHead}`
+        }
+      )
       if (compareResult.data.total_commits === 0) {
         break
       }
       commits = compareResult.data.commits.concat(commits)
       compareHead = `${commits[0].sha}^`
+      // eslint-disable-next-line no-console
+      console.log(JSON.stringify(compareResult, null, 2))
     }
 
     core.info(
@@ -124,9 +127,6 @@ export function filterCommits(
   }
 
   if (filePath) {
-    // eslint-disable-next-line no-console
-    console.log(filteredCommits)
-
     return filteredCommits.filter(
       commit =>
         commit.files &&
