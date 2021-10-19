@@ -55,7 +55,7 @@ class Commits {
         return __awaiter(this, void 0, void 0, function* () {
             // Fetch comparisons recursively until we don't find any commits
             // This is because the GitHub API limits the number of commits returned in a single response.
-            let commits = [];
+            const commits = [];
             let compareHead = head;
             // eslint-disable-next-line no-constant-condition
             while (true) {
@@ -67,10 +67,15 @@ class Commits {
                 if (compareResult.data.total_commits === 0) {
                     break;
                 }
-                commits = compareResult.data.commits.concat(commits);
+                for (const commit of compareResult.data.commits) {
+                    const commitInfo = yield this.octokit.repos.getCommit({
+                        owner,
+                        repo,
+                        ref: commit.sha
+                    });
+                    commits.push(commitInfo.data);
+                }
                 compareHead = `${commits[0].sha}^`;
-                // eslint-disable-next-line no-console
-                console.log(JSON.stringify(compareResult, null, 2));
             }
             core.info(`ℹ️ Found ${commits.length} commits from the GitHub API for ${owner}/${repo}`);
             return commits

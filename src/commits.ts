@@ -37,7 +37,7 @@ export class Commits {
   ): Promise<CommitInfo[]> {
     // Fetch comparisons recursively until we don't find any commits
     // This is because the GitHub API limits the number of commits returned in a single response.
-    let commits: RestEndpointMethodTypes['repos']['compareCommits']['response']['data']['commits'] =
+    const commits: RestEndpointMethodTypes['repos']['compareCommits']['response']['data']['commits'] =
       []
     let compareHead = head
     // eslint-disable-next-line no-constant-condition
@@ -52,10 +52,15 @@ export class Commits {
       if (compareResult.data.total_commits === 0) {
         break
       }
-      commits = compareResult.data.commits.concat(commits)
+      for (const commit of compareResult.data.commits) {
+        const commitInfo = await this.octokit.repos.getCommit({
+          owner,
+          repo,
+          ref: commit.sha
+        })
+        commits.push(commitInfo.data)
+      }
       compareHead = `${commits[0].sha}^`
-      // eslint-disable-next-line no-console
-      console.log(JSON.stringify(compareResult, null, 2))
     }
 
     core.info(
