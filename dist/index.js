@@ -42,8 +42,9 @@ exports.filterCommits = exports.Commits = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const moment_1 = __importDefault(__nccwpck_require__(9623));
 class Commits {
-    constructor(octokit) {
+    constructor(octokit, filePath) {
         this.octokit = octokit;
+        this.filePath = filePath;
     }
     getDiff(owner, repo, base, head) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -52,10 +53,11 @@ class Commits {
         });
     }
     getDiffRemote(owner, repo, base, head) {
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
             // Fetch comparisons recursively until we don't find any commits
             // This is because the GitHub API limits the number of commits returned in a single response.
-            const commits = [];
+            let commits = [];
             let compareHead = head;
             // eslint-disable-next-line no-constant-condition
             while (true) {
@@ -67,13 +69,19 @@ class Commits {
                 if (compareResult.data.total_commits === 0) {
                     break;
                 }
-                for (const commit of compareResult.data.commits) {
-                    const commitInfo = yield this.octokit.repos.getCommit({
-                        owner,
-                        repo,
-                        ref: commit.sha
-                    });
-                    commits.push(commitInfo.data);
+                if (this.filePath &&
+                    ((_a = compareResult.data.files) === null || _a === void 0 ? void 0 : _a.some(file => file.filename.startsWith(this.filePath)))) {
+                    for (const commit of compareResult.data.commits) {
+                        const commitInfo = yield this.octokit.repos.getCommit({
+                            owner,
+                            repo,
+                            ref: commit.sha
+                        });
+                        commits.push(commitInfo.data);
+                    }
+                }
+                else {
+                    commits = compareResult.data.commits.concat(commits);
                 }
                 compareHead = `${commits[0].sha}^`;
             }
@@ -634,7 +642,7 @@ class ReleaseNotes {
         return __awaiter(this, void 0, void 0, function* () {
             const { owner, repo, fromTag, toTag, failOnError } = this.options;
             core.info(`ℹ️ Comparing ${owner}/${repo} - '${fromTag}...${toTag}'`);
-            const commitsApi = new commits_1.Commits(octokit);
+            const commitsApi = new commits_1.Commits(octokit, this.options.filePath);
             let commits;
             try {
                 commits = yield commitsApi.getDiff(owner, repo, fromTag, toTag);

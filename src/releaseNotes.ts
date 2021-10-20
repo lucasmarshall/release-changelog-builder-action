@@ -59,7 +59,7 @@ export class ReleaseNotes {
     const {owner, repo, fromTag, toTag, failOnError} = this.options
     core.info(`ℹ️ Comparing ${owner}/${repo} - '${fromTag}...${toTag}'`)
 
-    const commitsApi = new Commits(octokit)
+    const commitsApi = new Commits(octokit, this.options.filePath)
     let commits: CommitInfo[]
     try {
       commits = await commitsApi.getDiff(owner, repo, fromTag, toTag)
